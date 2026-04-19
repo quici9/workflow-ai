@@ -18,11 +18,11 @@ pip install -r requirements.txt
 
 > **Lưu ý:** Mỗi lần mở terminal mới cần kích hoạt lại venv:
 > ```bash
-> source ~/workflow-ai/.venv/bin/activate
+> source ~/Projects/workflow-ai/.venv/bin/activate
 > ```
 > Hoặc thêm alias vào `~/.zshrc` cho tiện:
 > ```bash
-> alias workflow-ai='source ~/workflow-ai/.venv/bin/activate && python3 ~/workflow-ai/install.py'
+> alias workflow-ai='source ~/Projects/workflow-ai/.venv/bin/activate && python3 ~/Projects/workflow-ai/install.py'
 > ```
 
 ## Dùng

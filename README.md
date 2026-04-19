@@ -1,29 +1,47 @@
 # workflow-ai
 
-Cài AI workflow (Claude Code + Gemini) vào bất kỳ dự án nào — tự động detect stack, sinh CLAUDE.md tương thích, không conflict với config hiện có.
+Cài AI workflow (Claude Code + Antigravity) vào bất kỳ dự án nào — tự động detect stack, sinh CLAUDE.md tương thích, tạo cấu trúc `docs/modules/` làm giao thức trung gian giữa hai agent.
+
+## Workflow
+
+```
+Claude Code (terminal)          Antigravity (IDE)
+        │                               │
+        │  viết design.md               │
+        ├──────────────────────────────>│
+        │                               │  implement
+        │                               │  (đọc toàn repo)
+        │         review output         │
+        │<──────────────────────────────│
+        │                               │
+        │  git commit + push            │
+        ▼                               ▼
+                  Filesystem (repo)
+```
+
+- **Claude Code** = bộ não: thiết kế, quyết định, review security, git
+- **Antigravity** = đôi tay: implement, refactor, test, scaffolding
+- **`docs/modules/{name}/design.md`** = giao thức trung gian, không copy-paste
 
 ## Cài đặt (một lần)
 
 ```bash
-git clone https://github.com/quici9/workflow-ai.git ~/workflow-ai
-cd ~/workflow-ai
+git clone https://github.com/quici9/workflow-ai.git ~/Projects/workflow-ai
+cd ~/Projects/workflow-ai
 
-# Tạo và kích hoạt virtual env
 python3 -m venv .venv
 source .venv/bin/activate
-
-# Cài dependencies
 pip install -r requirements.txt
 ```
 
-> **Lưu ý:** Mỗi lần mở terminal mới cần kích hoạt lại venv:
-> ```bash
-> source ~/Projects/workflow-ai/.venv/bin/activate
-> ```
-> Hoặc thêm alias vào `~/.zshrc` cho tiện:
-> ```bash
-> alias workflow-ai='source ~/Projects/workflow-ai/.venv/bin/activate && python3 ~/Projects/workflow-ai/install.py'
-> ```
+Thêm alias vào `~/.zshrc`:
+```bash
+alias workflow-ai='source ~/Projects/workflow-ai/.venv/bin/activate && python3 ~/Projects/workflow-ai/install.py'
+```
+
+```bash
+source ~/.zshrc
+```
 
 ## Dùng
 
@@ -52,81 +70,63 @@ workflow-ai --target ~/projects/my-app --update
 workflow-ai --target ~/projects/my-app --dry-run
 ```
 
-### Chỉ xem ProjectProfile (không ghi file)
-```bash
-workflow-ai --target ~/projects/my-app --profile-only
+## Sau khi install
+
+Install tạo 3 thứ trong dự án của bạn:
+
+```
+your-project/
+├── CLAUDE.md              ← phân công Claude Code vs Antigravity theo stack
+├── .env.example           ← template API key
+└── docs/
+    └── modules/
+        └── README.md      ← hướng dẫn viết design.md
 ```
 
-> Nếu chưa set alias, thay `workflow-ai` bằng:
-> ```bash
-> python3 ~/workflow-ai/install.py
-> ```
+### Quy trình làm việc
 
-## Setup API keys cho từng dự án
+```
+[ ] 1. claude (terminal) → "Thiết kế module [tên]. Ghi docs/modules/[tên]/design.md"
+[ ] 2. Antigravity        → "Đọc design.md và implement toàn bộ module"
+[ ] 3. claude (terminal) → "Review security + logic trong src/[tên]/"
+[ ] 4. Antigravity        → sửa theo feedback
+[ ] 5. claude (terminal) → git commit + push
+```
 
-Sau khi chạy install, một file `.env.example` sẽ được tạo trong dự án. Copy và điền key:
+## Tối ưu chi phí Claude Code
+
+```bash
+# 80% task hàng ngày — Sonnet đủ dùng
+claude --model claude-sonnet-4-6
+
+# Thiết kế kiến trúc, security review — dùng Opus
+claude --model claude-opus-4-6
+```
+
+## Setup API key
 
 ```bash
 cp ~/projects/my-app/.env.example ~/projects/my-app/.env
-# Mở .env và điền giá trị thật
+# Điền ANTHROPIC_API_KEY vào .env
 ```
 
-Nội dung `.env`:
+Dùng proxy:
 ```env
-GEMINI_API_KEY=your_gemini_key
-ANTHROPIC_API_KEY=your_anthropic_key
-
-# Tuỳ chọn: override model mặc định
-# GEMINI_MODEL=gemini-3-flash-preview
-# ANTHROPIC_MODEL=claude-sonnet-4-6
-
-# Tuỳ chọn: dùng proxy thay vì API trực tiếp
-# ANTHROPIC_BASE_URL=https://your-proxy.example.com
-# GEMINI_BASE_URL=https://your-proxy.example.com
-```
-
-`scripts/gemini.py` tự load `.env` khi chạy — không cần `export` thủ công.
-`.env` đã được tự động thêm vào `.gitignore`, không lo bị commit nhầm.
-
-## Cấu trúc
-
-```
-workflow-ai/
-├── install.py                  # Entry point
-├── requirements.txt
-├── analyzers/
-│   ├── detect_stack.py         # Detect tech stack (local, không gửi code ra ngoài)
-│   ├── detect_conventions.py   # Detect formatter, linter, naming conventions
-│   └── detect_conflicts.py     # Kiểm tra conflict với config hiện có
-├── generators/
-│   └── generate_claude_md.py   # Sinh CLAUDE.md qua Claude API (fallback: template tĩnh)
-├── scripts/
-│   └── gemini.py               # Script gọi Gemini API (được cài vào dự án)
-└── templates/
-    └── CLAUDE.md.base          # Template tĩnh fallback
-```
-
-Sau khi install, dự án của bạn chỉ nhận 2 file:
-```
-your-project/
-├── .env.example       ← commit được
-├── scripts/
-│   └── gemini.py      ← script gọi Gemini
-└── CLAUDE.md          ← config cho Claude Code
+ANTHROPIC_BASE_URL=https://your-proxy.example.com
 ```
 
 ## Security
 
 - Analysis chạy **100% local** — không gửi source code ra ngoài
-- Chỉ gửi **ProjectProfile JSON** (~500 tokens, không chứa code) lên Claude API để sinh CLAUDE.md
-- API keys đọc từ `.env` per-project, không hardcode, không ghi vào git
+- Chỉ gửi **ProjectProfile JSON** (~500 tokens) lên Claude API để sinh CLAUDE.md
+- Không cần Gemini API riêng — Antigravity đã có Gemini built-in
 
 ## Stack được detect
 
 | Language | Frameworks | Database | Infra |
 |----------|-----------|----------|-------|
-| TypeScript/JavaScript | React, Next.js, Vue, Angular, Svelte, Astro | PostgreSQL, MySQL, MongoDB, Redis | Docker, GitHub Actions, Terraform |
-| Python | FastAPI, Flask, Django, PyTorch, pandas | SQLAlchemy, Prisma, Drizzle | GitLab CI, Jenkins |
-| Ruby | Rails, Sinatra | ActiveRecord | Kubernetes, Helm |
+| TypeScript/JavaScript | React, Next.js, Vue, Angular, Svelte | PostgreSQL, MySQL, MongoDB, Redis | Docker, GitHub Actions |
+| Python | FastAPI, Flask, Django, PyTorch | SQLAlchemy, Prisma | GitLab CI, Kubernetes |
+| Ruby | Rails, Sinatra | ActiveRecord | Helm, Terraform |
 | Go | Gin, Echo, Fiber, Chi | GORM | |
 | Java/Kotlin | Spring Boot | | |

@@ -97,18 +97,21 @@ Dưới đây là thông tin về dự án (đã được extract local, không 
 
 Hãy sinh ra nội dung file CLAUDE.md cho dự án này. File này sẽ được Claude Code đọc mỗi khi khởi động để biết cách làm việc với dự án.
 
-Yêu cầu:
+Workflow: Claude Code (terminal) + Antigravity IDE (Google/Gemini). Không dùng Gemini API riêng.
+- Claude Code = bộ não: thiết kế, quyết định, review, git
+- Antigravity = đôi tay: implement, refactor, test, scaffolding
+- Giao thức trung gian: docs/modules/{name}/design.md
+
+Yêu cầu sinh CLAUDE.md:
 1. Phần "## Stack" — liệt kê tech stack đã detect, ngắn gọn
-2. Phần "## Phân tầng Mô hình" — bảng 4 tầng chi phí, điều chỉnh theo stack cụ thể:
-   - Tầng 1 Opus: thiết kế kiến trúc, business logic, security
-   - Tầng 2 Sonnet sub-agent: review code Gemini, lint, unit tests (KHÔNG dùng Opus cho review)
-   - Tầng 3 Gemini 2.5 Pro: boilerplate lớn, UI components, CRUD
-   - Tầng 4 Gemini 2.5 Flash: mock data, seed scripts, task đơn giản
-3. Phần "## Quy tắc Phân công" — chi tiết theo stack: ví dụ nếu có React thì component nào dùng Gemini Pro, component nào cần Opus; nếu có FastAPI thì endpoint nào Gemini Flash là đủ
-4. Phần "## Cách Gọi Gemini" — hướng dẫn dùng scripts/gemini.py, bao gồm cách switch Flash/Pro
-5. Phần "## Conventions" — naming, formatter, linter theo detect được
-6. Phần "## Cấu trúc Dự án" — cấu trúc docs/modules/, src/, tests/
-7. Phần "## Quy trình Sau Khi Gọi Gemini" — PHẢI có 4 bước: nhận → review bằng Sonnet → sửa → báo cáo. Chỉ leo thang Opus nếu phát hiện vấn đề security hoặc logic phức tạp.
+2. Phần "## Conventions" — naming, formatter, linter theo detect được
+3. Phần "## Cấu trúc Dự án" — docs/modules/, src/, tests/
+4. Phần "## Phân công: Claude Code vs Antigravity" — chi tiết theo stack cụ thể:
+   - Claude Code làm gì (thiết kế, review, git...)
+   - Antigravity làm gì (implement, test, refactor...)
+   - Ví dụ cụ thể theo stack: nếu FastAPI → Claude Code thiết kế endpoint contracts, Antigravity sinh router + schema + tests
+5. Phần "## Quy trình Mỗi Module Mới" — 5 bước: design.md → implement → review → sửa → commit
+6. Phần "## Tối ưu Chi phí Claude Code" — bảng task vs model (Opus/Sonnet), Antigravity không tốn thêm
 
 Chỉ xuất nội dung CLAUDE.md, không có giải thích thêm. Dùng tiếng Việt."""
 

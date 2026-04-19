@@ -126,10 +126,10 @@ def main():
     # Ghi CLAUDE.md
     _write_claude_md(target, claude_md_content, conflicts["claude_md"], args.update)
 
-    # Copy scripts/gemini.py
-    _install_gemini_script(target, conflicts["scripts_gemini"])
+    # Tạo cấu trúc docs/modules/
+    _setup_docs_structure(target)
 
-    # Tạo .env.example và đảm bảo .env trong .gitignore
+    # Tạo .env.example
     _setup_env_files(target)
 
     # Update .gitignore
@@ -163,20 +163,32 @@ def _write_claude_md(target: Path, content: str, conflict_info: dict, update_mod
         print(f"      ✓ Ghi CLAUDE.md")
 
 
-def _install_gemini_script(target: Path, conflict_info: dict):
-    src = REPO_ROOT / "scripts" / "gemini.py"
-    dst_dir = target / "scripts"
-    dst = dst_dir / "gemini.py"
-
-    if conflict_info["action"] == "skip_with_warning":
-        print(f"      ⚠ scripts/gemini.py đã tồn tại (không do workflow-ai tạo) — BỎ QUA.")
-        print(f"        Nếu muốn overwrite: xóa file rồi chạy lại install.py")
-        return
-
-    dst_dir.mkdir(exist_ok=True)
-    shutil.copy2(src, dst)
-    dst.chmod(0o755)
-    print(f"      ✓ Cài scripts/gemini.py")
+def _setup_docs_structure(target: Path):
+    """Tạo cấu trúc docs/modules/ nếu chưa có."""
+    docs_dir = target / "docs" / "modules"
+    if not docs_dir.exists():
+        docs_dir.mkdir(parents=True)
+        # Tạo file README làm hướng dẫn
+        (docs_dir / "README.md").write_text(
+            "# Module Design Specs\n\n"
+            "Mỗi module có một thư mục riêng với file `design.md`.\n\n"
+            "## Cấu trúc\n"
+            "```\n"
+            "docs/modules/\n"
+            "├── auth/\n"
+            "│   └── design.md   ← Claude Code viết, Antigravity đọc để implement\n"
+            "├── users/\n"
+            "│   └── design.md\n"
+            "└── ...\n"
+            "```\n\n"
+            "## Quy trình\n"
+            "1. Claude Code viết `design.md` (schema, API contracts, security notes)\n"
+            "2. Antigravity đọc `design.md` + toàn bộ repo → implement\n"
+            "3. Claude Code review output → commit\n"
+        )
+        print("      ✓ Tạo docs/modules/ structure")
+    else:
+        print("      ✓ docs/modules/ đã tồn tại")
 
 
 def _setup_env_files(target: Path):
@@ -186,18 +198,15 @@ def _setup_env_files(target: Path):
 
     if not env_example.exists():
         env_example.write_text(
-            "# API keys cho workflow-ai\n"
+            "# API key cho Claude Code (workflow-ai installer)\n"
             "# Copy file này thành .env rồi điền giá trị thật\n"
-            "GEMINI_API_KEY=\n"
             "ANTHROPIC_API_KEY=\n"
             "\n"
-            "# Model tuỳ chọn (bỏ comment để override)\n"
-            "# GEMINI_MODEL=gemini-3-flash-preview\n"
+            "# Model tuỳ chọn (mặc định: claude-opus-4-6)\n"
             "# ANTHROPIC_MODEL=claude-sonnet-4-6\n"
             "\n"
-            "# Proxy tuỳ chọn — bỏ comment nếu dùng proxy thay vì Anthropic API trực tiếp\n"
+            "# Proxy tuỳ chọn\n"
             "# ANTHROPIC_BASE_URL=https://your-proxy.example.com\n"
-            "# GEMINI_BASE_URL=https://your-proxy.example.com\n"
         )
         print("      ✓ Tạo .env.example")
     else:
@@ -252,12 +261,12 @@ def _print_profile(profile: dict):
 
 def _print_conflicts(conflicts: dict):
     claude_status = conflicts["claude_md"]["status"]
-    gemini_status = conflicts["scripts_gemini"]["status"]
     gi_status = conflicts["gitignore"]["status"]
+    docs_status = "missing" if not (Path(".") / "docs" / "modules").exists() else "exists"
 
     status_icon = {"missing": "○", "exists": "●", "managed": "◉", "exists_unmanaged": "●"}
     print(f"      {status_icon.get(claude_status, '?')} CLAUDE.md: {claude_status}")
-    print(f"      {status_icon.get(gemini_status, '?')} scripts/gemini.py: {gemini_status}")
+    print(f"      {status_icon.get(docs_status, '?')} docs/modules/: {docs_status}")
     print(f"      {status_icon.get(gi_status, '?')} .gitignore: {gi_status}")
 
     existing = conflicts["existing_configs"]
@@ -268,7 +277,7 @@ def _print_conflicts(conflicts: dict):
 def _print_dry_run(target: Path, conflicts: dict):
     actions = {
         "CLAUDE.md": conflicts["claude_md"]["action"],
-        "scripts/gemini.py": conflicts["scripts_gemini"]["action"],
+        "docs/modules/": "create nếu chưa có",
         ".gitignore": conflicts["gitignore"]["action"],
     }
     for f, action in actions.items():
@@ -277,12 +286,12 @@ def _print_dry_run(target: Path, conflicts: dict):
 
 def _print_next_steps(target: Path):
     print("\nBước tiếp theo:")
-    print(f"  1. Điền API keys vào {target}/.env:")
-    print(f"       cp {target}/.env.example {target}/.env")
-    print(f"       # Mở .env và điền GEMINI_API_KEY, ANTHROPIC_API_KEY")
-    print(f"  2. Mở Claude Code:")
+    print(f"  1. Mở dự án trong Antigravity IDE")
+    print(f"  2. Mở terminal riêng, vào dự án và chạy Claude Code:")
     print(f"       cd {target} && claude")
-    print("  3. Nói với Claude Code: \"Thiết kế module đầu tiên: [tên]. Dùng Gemini sinh code.\"")
+    print("  3. Nói với Claude Code:")
+    print("       \"Thiết kế module đầu tiên: [tên]. Ghi vào docs/modules/[tên]/design.md\"")
+    print("  4. Sau khi có design.md → chuyển sang Antigravity để implement")
     print("\n  Để update sau khi stack thay đổi:")
     print(f"       python3 {REPO_ROOT}/install.py --target {target} --update")
 

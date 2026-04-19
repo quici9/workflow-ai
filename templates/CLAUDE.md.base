@@ -10,67 +10,58 @@
 
 ## Cấu trúc Dự án
 
-- `docs/modules/{name}/design.md` — thiết kế từng module
-- `src/` — mã nguồn
-- `tests/` — unit/integration tests
-- `scripts/gemini.py` — script gọi Gemini API
+- `docs/modules/{name}/design.md` — spec thiết kế từng module (Claude Code viết)
+- `src/` — mã nguồn (Antigravity implement)
+- `tests/` — unit/integration tests (Antigravity sinh tự động)
 
-## Cách Gọi Gemini
+---
+
+## Phân công: Claude Code vs Antigravity
+
+### Claude Code làm (terminal — bạn đang dùng):
+- Thiết kế database schema, API contracts
+- Viết `docs/modules/{name}/design.md`
+- Review security, logic, edge cases
+- Quyết định kiến trúc (caching, service boundaries)
+- Sửa bug logic phức tạp
+- Migration scripts ảnh hưởng data integrity
+- Git operations, CI/CD config
+- Bất kỳ thứ gì liên quan đến auth, payment, permissions
+
+### Antigravity làm (IDE — chuyển sang khi cần implement):
+- Đọc `design.md` → sinh implementation đầy đủ
+- Scaffolding toàn bộ module từ đầu
+- Refactor quy mô lớn (đổi tên, restructure toàn repo)
+- Viết unit/integration tests tự động
+- Debug runtime errors (inline context)
+- UI components, CSS, boilerplate
+- Cài thư viện, setup môi trường
+
+---
+
+## Quy trình Mỗi Module Mới
+
+1. **Claude Code** → viết `docs/modules/{name}/design.md` (schema, API contracts, security notes)
+2. **Antigravity** → đọc `design.md` + toàn bộ repo → implement
+3. **Claude Code** → review security + logic, so sánh với `design.md`
+4. **Antigravity** → sửa theo feedback
+5. **Claude Code** → git commit + push
+
+---
+
+## Tối ưu Chi phí Claude Code
+
+| Task | Model |
+|------|-------|
+| Thiết kế kiến trúc, security review | Opus |
+| Viết design.md, API contracts | Opus |
+| Review code từ Antigravity | Sonnet |
+| Git, CI/CD, lint, task đơn giản | Sonnet |
 
 ```bash
-python scripts/gemini.py "prompt" [file1] [file2] ...
+# Mặc định hàng ngày
+claude --model claude-sonnet-4-6
 
-# Ví dụ:
-python scripts/gemini.py "Tạo React component UserProfile theo design này" \
-  docs/modules/users/design.md \
-  src/types/user.ts
-
-# Dùng model rẻ hơn cho task đơn giản:
-GEMINI_MODEL=gemini-3-flash-preview python scripts/gemini.py "Tạo mock data users"
+# Khi cần reasoning sâu
+claude --model claude-opus-4-6
 ```
-
-## Phân tầng Mô hình — theo chi phí
-
-| Tầng | Model | Dùng khi |
-|------|-------|----------|
-| 1 — Nặng | Opus (mặc định) | Thiết kế kiến trúc, business logic, security |
-| 2 — Trung | Sonnet sub-agent | Review code Gemini, lint, unit tests |
-| 3 — Rẻ | Gemini 3.1 Pro Preview | Sinh boilerplate, UI, CRUD, mock data |
-| 4 — Rất rẻ | Gemini 3 Flash Preview | Sinh code đơn giản, seed scripts, formatting |
-
-## Quy tắc Phân công
-
-### DÙNG GEMINI 2.5 PRO khi:
-- Sinh > 200 dòng code boilerplate hoặc UI
-- Tạo components từ wireframe hoặc mô tả
-- Viết CSS/styling phức tạp
-- Tạo nhiều file CRUD cùng pattern
-
-### DÙNG GEMINI 2.5 FLASH khi (GEMINI_MODEL=gemini-3-flash-preview):
-- Sinh mock data, seed scripts, fixtures
-- Format lại code, đổi tên hàng loạt
-- Tạo boilerplate tests (không có logic)
-
-### DÙNG SONNET SUB-AGENT khi:
-- Review code từ Gemini (đọc + nhận xét, không cần reasoning sâu)
-- Lint fixes, import cleanup
-- Viết unit tests cho code đã có
-
-### DÙNG OPUS (tự làm) khi:
-- Thiết kế database schema, API contracts
-- Viết business logic, state machine, workflow
-- Review security, auth, payment, permissions
-- Quyết định kiến trúc (caching, scaling, service boundaries)
-- Sửa bug logic phức tạp
-- Viết migration scripts có ảnh hưởng data integrity
-
-## Quy trình Bắt buộc Sau Khi Gọi Gemini
-
-Mỗi khi dùng `scripts/gemini.py`, PHẢI thực hiện đủ 4 bước sau trước khi báo cáo cho user:
-
-1. **Nhận code** từ Gemini output
-2. **Review bằng Sonnet sub-agent** — kiểm tra: logic có đúng không, đúng conventions chưa, khớp với design không. Không cần Opus cho bước này.
-3. **Sửa** — tự sửa các vấn đề phát hiện được, không hỏi user từng lỗi nhỏ. Chỉ leo thang lên Opus nếu phát hiện vấn đề security hoặc logic phức tạp.
-4. **Báo cáo** — tóm tắt ngắn: Gemini sinh gì, Sonnet review thấy gì, đã sửa gì.
-
-Không được giao thẳng code Gemini cho user mà không qua bước review.

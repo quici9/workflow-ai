@@ -1,0 +1,49 @@
+# Hướng dẫn Dự án
+
+## Stack
+
+[[STACK]]
+
+## Conventions
+
+[[CONVENTIONS]]
+
+## Cấu trúc Dự án
+
+- `docs/modules/{name}/design.md` — thiết kế từng module
+- `src/` — mã nguồn
+- `tests/` — unit/integration tests
+- `scripts/gemini.py` — script gọi Gemini API
+
+## Cách Gọi Gemini
+
+```bash
+python scripts/gemini.py "prompt" [file1] [file2] ...
+
+# Ví dụ:
+python scripts/gemini.py "Tạo React component UserProfile theo design này" \
+  docs/modules/users/design.md \
+  src/types/user.ts
+
+# Dùng model rẻ hơn cho task đơn giản:
+GEMINI_MODEL=gemini-2.5-flash python scripts/gemini.py "Tạo mock data users"
+```
+
+## Quy tắc Phân công Mô hình
+
+### GỌI GEMINI khi:
+- Sinh > 200 dòng code boilerplate hoặc UI
+- Tạo components từ wireframe hoặc mô tả
+- Viết CSS/styling phức tạp
+- Sinh mock data hoặc seed scripts
+- Tạo nhiều file CRUD cùng pattern
+- Viết boilerplate tests (setup, fixtures)
+
+### TỰ LÀM (Claude) khi:
+- Thiết kế database schema, API contracts
+- Viết business logic (tính toán, state machine, workflow)
+- Review code (logic, security, edge cases)
+- Quyết định kiến trúc (caching, scaling, service boundaries)
+- Sửa bug logic phức tạp
+- Viết migration scripts có ảnh hưởng data integrity
+- Bất kỳ thứ gì liên quan đến auth, payment, permissions

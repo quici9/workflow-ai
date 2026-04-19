@@ -76,8 +76,13 @@ Nội dung `.env`:
 GEMINI_API_KEY=your_gemini_key
 ANTHROPIC_API_KEY=your_anthropic_key
 
-# Tuỳ chọn: override model mặc định (gemini-2.5-pro)
+# Tuỳ chọn: override model mặc định
 # GEMINI_MODEL=gemini-2.5-flash
+# ANTHROPIC_MODEL=claude-sonnet-4-6
+
+# Tuỳ chọn: dùng proxy thay vì API trực tiếp
+# ANTHROPIC_BASE_URL=https://your-proxy.example.com
+# GEMINI_BASE_URL=https://your-proxy.example.com
 ```
 
 `scripts/gemini.py` tự load `.env` khi chạy — không cần `export` thủ công.

@@ -56,9 +56,12 @@ def _generate_with_claude(profile: dict) -> str:
         raise RuntimeError("ANTHROPIC_API_KEY chưa được set")
 
     base_url = os.environ.get("ANTHROPIC_BASE_URL")
+    if base_url:
+        print(f"[workflow-ai] Dùng proxy: {base_url}")
+
     client = anthropic.Anthropic(
         api_key=api_key,
-        base_url=base_url,
+        base_url=base_url or anthropic.DEFAULT_BASE_URL,
         timeout=30.0,   # không chờ quá 30s
         max_retries=0,  # tắt retry của SDK — fallback ngay khi lỗi
     )

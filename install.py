@@ -193,6 +193,11 @@ def _setup_env_files(target: Path):
             "\n"
             "# Model tuỳ chọn (bỏ comment để override)\n"
             "# GEMINI_MODEL=gemini-2.5-flash\n"
+            "# ANTHROPIC_MODEL=claude-sonnet-4-6\n"
+            "\n"
+            "# Proxy tuỳ chọn — bỏ comment nếu dùng proxy thay vì Anthropic API trực tiếp\n"
+            "# ANTHROPIC_BASE_URL=https://your-proxy.example.com\n"
+            "# GEMINI_BASE_URL=https://your-proxy.example.com\n"
         )
         print("      ✓ Tạo .env.example")
     else:

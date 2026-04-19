@@ -58,7 +58,12 @@ def call_gemini(prompt: str, context_files: list[str] = None) -> str:
     if not api_key:
         raise EnvironmentError("GEMINI_API_KEY chưa được set. Chạy: export GEMINI_API_KEY=xxx")
 
-    client = genai.Client(api_key=api_key)
+    base_url = os.environ.get("GEMINI_BASE_URL")
+    if base_url:
+        print(f"[gemini.py] Dùng proxy: {base_url}", file=sys.stderr)
+        client = genai.Client(api_key=api_key, http_options={"base_url": base_url})
+    else:
+        client = genai.Client(api_key=api_key)
 
     # Build full prompt với context files
     full_prompt = SYSTEM_PROMPT + "\n\n"

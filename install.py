@@ -192,7 +192,7 @@ def _setup_env_files(target: Path):
             "ANTHROPIC_API_KEY=\n"
             "\n"
             "# Model tuỳ chọn (bỏ comment để override)\n"
-            "# GEMINI_MODEL=gemini-2.5-flash\n"
+            "# GEMINI_MODEL=gemini-3-flash-preview\n"
             "# ANTHROPIC_MODEL=claude-sonnet-4-6\n"
             "\n"
             "# Proxy tuỳ chọn — bỏ comment nếu dùng proxy thay vì Anthropic API trực tiếp\n"

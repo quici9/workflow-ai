@@ -77,7 +77,7 @@ GEMINI_API_KEY=your_gemini_key
 ANTHROPIC_API_KEY=your_anthropic_key
 
 # Tuỳ chọn: override model mặc định
-# GEMINI_MODEL=gemini-2.5-flash
+# GEMINI_MODEL=gemini-3-flash-preview
 # ANTHROPIC_MODEL=claude-sonnet-4-6
 
 # Tuỳ chọn: dùng proxy thay vì API trực tiếp

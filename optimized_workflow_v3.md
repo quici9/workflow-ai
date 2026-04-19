@@ -63,9 +63,9 @@ Lưu vào repo dự án tại `scripts/gemini.py`:
 #!/usr/bin/env python3
 """Script để Claude Code gọi Gemini API sinh code.
 
-Yêu cầu: pip install google-genai>=1.0
+Yêu cầu: pip install -q -U google-genai
 Dùng: python scripts/gemini.py "prompt" [file1] [file2] ...
-      GEMINI_MODEL=gemini-2.5-flash python scripts/gemini.py "prompt"  # rẻ hơn
+      GEMINI_MODEL=gemini-3-flash-preview python scripts/gemini.py "prompt"  # rẻ hơn
 """
 
 import re
@@ -73,7 +73,7 @@ import sys
 import os
 from google import genai
 
-MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-pro")
+MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.1-pro-preview")
 
 
 def strip_markdown_fence(text: str) -> str:
@@ -288,7 +288,7 @@ python scripts/gemini.py "Tạo component UserProfile" \
 
 ```
 [ ] 1. Cài Claude Code: npm install -g @anthropic-ai/claude-code
-[ ] 2. Cài dependency: pip install google-genai>=1.0
+[ ] 2. Cài dependency: pip install -q -U google-genai
 [ ] 3. Set API keys: export GEMINI_API_KEY=xxx (thêm vào ~/.zshrc để persist)
 [ ] 4. Thêm .env vào .gitignore nếu lưu key trong file
 [ ] 5. Copy scripts/gemini.py vào repo

@@ -26,7 +26,7 @@ python scripts/gemini.py "Tạo React component UserProfile theo design này" \
   src/types/user.ts
 
 # Dùng model rẻ hơn cho task đơn giản:
-GEMINI_MODEL=gemini-2.5-flash python scripts/gemini.py "Tạo mock data users"
+GEMINI_MODEL=gemini-3-flash-preview python scripts/gemini.py "Tạo mock data users"
 ```
 
 ## Phân tầng Mô hình — theo chi phí
@@ -35,8 +35,8 @@ GEMINI_MODEL=gemini-2.5-flash python scripts/gemini.py "Tạo mock data users"
 |------|-------|----------|
 | 1 — Nặng | Opus (mặc định) | Thiết kế kiến trúc, business logic, security |
 | 2 — Trung | Sonnet sub-agent | Review code Gemini, lint, unit tests |
-| 3 — Rẻ | Gemini 2.5 Pro | Sinh boilerplate, UI, CRUD, mock data |
-| 4 — Rất rẻ | Gemini 2.5 Flash | Sinh code đơn giản, seed scripts, formatting |
+| 3 — Rẻ | Gemini 3.1 Pro Preview | Sinh boilerplate, UI, CRUD, mock data |
+| 4 — Rất rẻ | Gemini 3 Flash Preview | Sinh code đơn giản, seed scripts, formatting |
 
 ## Quy tắc Phân công
 
@@ -46,7 +46,7 @@ GEMINI_MODEL=gemini-2.5-flash python scripts/gemini.py "Tạo mock data users"
 - Viết CSS/styling phức tạp
 - Tạo nhiều file CRUD cùng pattern
 
-### DÙNG GEMINI 2.5 FLASH khi (GEMINI_MODEL=gemini-2.5-flash):
+### DÙNG GEMINI 2.5 FLASH khi (GEMINI_MODEL=gemini-3-flash-preview):
 - Sinh mock data, seed scripts, fixtures
 - Format lại code, đổi tên hàng loạt
 - Tạo boilerplate tests (không có logic)

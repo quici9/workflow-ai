@@ -65,7 +65,11 @@ def _generate_with_claude(profile: dict) -> str:
         messages=[{"role": "user", "content": prompt}],
     )
 
-    return message.content[0].text
+    # Lọc lấy TextBlock, bỏ qua ThinkingBlock (extended thinking)
+    text_blocks = [b for b in message.content if hasattr(b, "text")]
+    if not text_blocks:
+        raise RuntimeError("Claude API không trả về text block nào")
+    return text_blocks[-1].text
 
 
 def _build_prompt(profile: dict) -> str:

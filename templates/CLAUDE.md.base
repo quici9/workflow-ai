@@ -47,3 +47,14 @@ GEMINI_MODEL=gemini-2.5-flash python scripts/gemini.py "Tạo mock data users"
 - Sửa bug logic phức tạp
 - Viết migration scripts có ảnh hưởng data integrity
 - Bất kỳ thứ gì liên quan đến auth, payment, permissions
+
+## Quy trình Bắt buộc Sau Khi Gọi Gemini
+
+Mỗi khi dùng `scripts/gemini.py`, PHẢI thực hiện đủ 4 bước sau trước khi báo cáo cho user:
+
+1. **Nhận code** từ Gemini output
+2. **Review** — kiểm tra: logic có đúng không, có lỗ hổng security không, có đúng conventions của dự án không, có khớp với design đã đặt ra không
+3. **Sửa** — tự sửa các vấn đề phát hiện được, không hỏi user từng lỗi nhỏ
+4. **Báo cáo** — tóm tắt: đã làm gì, Gemini sinh ra gì, đã sửa gì và tại sao
+
+Không được giao thẳng code Gemini cho user mà không qua bước review.

@@ -29,32 +29,48 @@ python scripts/gemini.py "Tạo React component UserProfile theo design này" \
 GEMINI_MODEL=gemini-2.5-flash python scripts/gemini.py "Tạo mock data users"
 ```
 
-## Quy tắc Phân công Mô hình
+## Phân tầng Mô hình — theo chi phí
 
-### GỌI GEMINI khi:
+| Tầng | Model | Dùng khi |
+|------|-------|----------|
+| 1 — Nặng | Opus (mặc định) | Thiết kế kiến trúc, business logic, security |
+| 2 — Trung | Sonnet sub-agent | Review code Gemini, lint, unit tests |
+| 3 — Rẻ | Gemini 2.5 Pro | Sinh boilerplate, UI, CRUD, mock data |
+| 4 — Rất rẻ | Gemini 2.5 Flash | Sinh code đơn giản, seed scripts, formatting |
+
+## Quy tắc Phân công
+
+### DÙNG GEMINI 2.5 PRO khi:
 - Sinh > 200 dòng code boilerplate hoặc UI
 - Tạo components từ wireframe hoặc mô tả
 - Viết CSS/styling phức tạp
-- Sinh mock data hoặc seed scripts
 - Tạo nhiều file CRUD cùng pattern
-- Viết boilerplate tests (setup, fixtures)
 
-### TỰ LÀM (Claude) khi:
+### DÙNG GEMINI 2.5 FLASH khi (GEMINI_MODEL=gemini-2.5-flash):
+- Sinh mock data, seed scripts, fixtures
+- Format lại code, đổi tên hàng loạt
+- Tạo boilerplate tests (không có logic)
+
+### DÙNG SONNET SUB-AGENT khi:
+- Review code từ Gemini (đọc + nhận xét, không cần reasoning sâu)
+- Lint fixes, import cleanup
+- Viết unit tests cho code đã có
+
+### DÙNG OPUS (tự làm) khi:
 - Thiết kế database schema, API contracts
-- Viết business logic (tính toán, state machine, workflow)
-- Review code (logic, security, edge cases)
+- Viết business logic, state machine, workflow
+- Review security, auth, payment, permissions
 - Quyết định kiến trúc (caching, scaling, service boundaries)
 - Sửa bug logic phức tạp
 - Viết migration scripts có ảnh hưởng data integrity
-- Bất kỳ thứ gì liên quan đến auth, payment, permissions
 
 ## Quy trình Bắt buộc Sau Khi Gọi Gemini
 
 Mỗi khi dùng `scripts/gemini.py`, PHẢI thực hiện đủ 4 bước sau trước khi báo cáo cho user:
 
 1. **Nhận code** từ Gemini output
-2. **Review** — kiểm tra: logic có đúng không, có lỗ hổng security không, có đúng conventions của dự án không, có khớp với design đã đặt ra không
-3. **Sửa** — tự sửa các vấn đề phát hiện được, không hỏi user từng lỗi nhỏ
-4. **Báo cáo** — tóm tắt: đã làm gì, Gemini sinh ra gì, đã sửa gì và tại sao
+2. **Review bằng Sonnet sub-agent** — kiểm tra: logic có đúng không, đúng conventions chưa, khớp với design không. Không cần Opus cho bước này.
+3. **Sửa** — tự sửa các vấn đề phát hiện được, không hỏi user từng lỗi nhỏ. Chỉ leo thang lên Opus nếu phát hiện vấn đề security hoặc logic phức tạp.
+4. **Báo cáo** — tóm tắt ngắn: Gemini sinh gì, Sonnet review thấy gì, đã sửa gì.
 
 Không được giao thẳng code Gemini cho user mà không qua bước review.

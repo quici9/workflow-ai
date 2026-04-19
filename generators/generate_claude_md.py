@@ -99,16 +99,16 @@ Hãy sinh ra nội dung file CLAUDE.md cho dự án này. File này sẽ đượ
 
 Yêu cầu:
 1. Phần "## Stack" — liệt kê tech stack đã detect, ngắn gọn
-2. Phần "## Quy tắc Phân công Mô hình" — phân công rõ: tự làm vs gọi Gemini, dựa trên stack cụ thể
-   - Ví dụ: nếu có React → Gemini sinh components, hooks boilerplate
-   - Nếu có FastAPI → Gemini sinh CRUD endpoints, schemas; Opus review auth/business logic
-3. Phần "## Cách Gọi Gemini" — hướng dẫn dùng scripts/gemini.py
-4. Phần "## Conventions" — naming, formatter, linter theo detect được
-5. Phần "## Cấu trúc Dự án" — cấu trúc docs/modules/, src/, tests/
-
-Quy tắc chung phải có (copy nguyên, không thay đổi):
-- GỌI GEMINI khi: sinh > 200 dòng boilerplate, UI components, CSS, mock data, CRUD cùng pattern
-- TỰ LÀM khi: thiết kế schema/API contracts, business logic, review security, quyết định kiến trúc, sửa bug phức tạp
+2. Phần "## Phân tầng Mô hình" — bảng 4 tầng chi phí, điều chỉnh theo stack cụ thể:
+   - Tầng 1 Opus: thiết kế kiến trúc, business logic, security
+   - Tầng 2 Sonnet sub-agent: review code Gemini, lint, unit tests (KHÔNG dùng Opus cho review)
+   - Tầng 3 Gemini 2.5 Pro: boilerplate lớn, UI components, CRUD
+   - Tầng 4 Gemini 2.5 Flash: mock data, seed scripts, task đơn giản
+3. Phần "## Quy tắc Phân công" — chi tiết theo stack: ví dụ nếu có React thì component nào dùng Gemini Pro, component nào cần Opus; nếu có FastAPI thì endpoint nào Gemini Flash là đủ
+4. Phần "## Cách Gọi Gemini" — hướng dẫn dùng scripts/gemini.py, bao gồm cách switch Flash/Pro
+5. Phần "## Conventions" — naming, formatter, linter theo detect được
+6. Phần "## Cấu trúc Dự án" — cấu trúc docs/modules/, src/, tests/
+7. Phần "## Quy trình Sau Khi Gọi Gemini" — PHẢI có 4 bước: nhận → review bằng Sonnet → sửa → báo cáo. Chỉ leo thang Opus nếu phát hiện vấn đề security hoặc logic phức tạp.
 
 Chỉ xuất nội dung CLAUDE.md, không có giải thích thêm. Dùng tiếng Việt."""
 

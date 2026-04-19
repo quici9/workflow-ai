@@ -55,15 +55,24 @@ def _generate_with_claude(profile: dict) -> str:
     if not api_key:
         raise RuntimeError("ANTHROPIC_API_KEY chưa được set")
 
-    client = anthropic.Anthropic(api_key=api_key)
+    base_url = os.environ.get("ANTHROPIC_BASE_URL")
+    client = anthropic.Anthropic(
+        api_key=api_key,
+        base_url=base_url,
+        timeout=30.0,   # không chờ quá 30s
+        max_retries=0,  # tắt retry của SDK — fallback ngay khi lỗi
+    )
 
     prompt = _build_prompt(profile)
 
-    message = client.messages.create(
-        model=os.environ.get("ANTHROPIC_MODEL", "claude-opus-4-6"),
-        max_tokens=2048,
-        messages=[{"role": "user", "content": prompt}],
-    )
+    try:
+        message = client.messages.create(
+            model=os.environ.get("ANTHROPIC_MODEL", "claude-opus-4-6"),
+            max_tokens=2048,
+            messages=[{"role": "user", "content": prompt}],
+        )
+    except Exception as e:
+        raise RuntimeError(f"Gọi Claude API thất bại: {e}")
 
     # Lọc lấy TextBlock, bỏ qua ThinkingBlock (extended thinking)
     text_blocks = [b for b in message.content if hasattr(b, "text")]
